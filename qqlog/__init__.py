@@ -4,9 +4,9 @@ import traceback
 import functools
 
 __logFormatter__ = logging.Formatter("%(asctime)-19.19s [%(levelname)s] [%(threadName)s] %(message)s")
-__mlogger__ = None 
+__qqlogger__ = None 
 __handlers__=dict()
-__logpath__='mlog.log'
+__logpath__='qqlog.log'
 __loglevel__ = logging.DEBUG
 __consoleOutput__ = True
 __fileHandler__ = None
@@ -29,57 +29,57 @@ def __createLogDir__(path):
     if not os.path.isdir(os.path.dirname(path)):
         os.makedirs(os.path.isdir(os.path.dirname(path)))
 
-def init(path='mlog.log',level=logging.DEBUG):    
-    global __mlogger__
+def init(path='qqlog.log',level=logging.DEBUG):    
+    global __qqlogger__
     global __loglevel__
     global __handlers__
     
-    __mlogger__ = logging.getLogger('mlog')
-    __mlogger__.handlers=[]
-    __mlogger__.setLevel(__loglevel__)
+    __qqlogger__ = logging.getLogger('qqlog')
+    __qqlogger__.handlers=[]
+    __qqlogger__.setLevel(__loglevel__)
 
     __createLogDir__(path)
     __logpath__= path
     __loglevel__= level
     __handlers__={}
-    __mlogger__.handlers=[]
-    __mlogger__.setLevel(__loglevel__)
+    __qqlogger__.handlers=[]
+    __qqlogger__.setLevel(__loglevel__)
     __createFileHandler__()
     __handlers__['file']=__fileHandler__
-    __mlogger__.addHandler(__fileHandler__)
+    __qqlogger__.addHandler(__fileHandler__)
     __createConsoleHandler__()
     __handlers__['console']=__consoleHandler__
-    __mlogger__.addHandler(__consoleHandler__)
+    __qqlogger__.addHandler(__consoleHandler__)
     
 def getLogger(name):
-    if name=='mlog':
-        return __mlogger__
+    if name=='qqlog':
+        return __qqlogger__
     else:
         return logging.getLogger(name)
     
-def enterleave(level = logging.DEBUG,rethrow=True,loggername='mlog'):
+def enterleave(level = logging.DEBUG,rethrow=True,loggername='qqlog'):
     def enterleave_wrap(func):
         @functools.wraps(func)
         def func_warp(*args, **kwargs):            
             try:
                 if level>=__loglevel__:
-                    mlog_msg='[ENTER]%s(%s)'%(func.__name__,str(args) + str(kwargs))
-                    getLogger(loggername).log(level,mlog_msg)
+                    qqlog_msg='[ENTER]%s(%s)'%(func.__name__,str(args) + str(kwargs))
+                    getLogger(loggername).log(level,qqlog_msg)
                 return_val = func(*args, **kwargs)                
                 if level>=__loglevel__:
-                    mlog_msg = '[RETURN]%s(%s)'%(func.__name__,return_val)
-                    getLogger(loggername).log(level,mlog_msg)
+                    qqlog_msg = '[RETURN]%s(%s)'%(func.__name__,return_val)
+                    getLogger(loggername).log(level,qqlog_msg)
                 return_val
             except Exception as ex:
                 #tb = traceback.format_exc()
-                mlog_msg = '[RAISE]%s: %s'%(func.__name__,ex)
-                getLogger(loggername).error(mlog_msg)
+                qqlog_msg = '[RAISE]%s: %s'%(func.__name__,ex)
+                getLogger(loggername).error(qqlog_msg)
                 if rethrow:
                     raise ex
         return func_warp
     return enterleave_wrap
 
-def ex(level = logging.ERROR,rethrow=False,loggername='mlog'):    
+def ex(level = logging.ERROR,rethrow=False,loggername='qqlog'):    
     def ex_wrap(func):
         @functools.wraps(func)
         def func_warp(*args, **kwargs):            
@@ -89,14 +89,14 @@ def ex(level = logging.ERROR,rethrow=False,loggername='mlog'):
             except Exception as ex:
                 if level>=__loglevel__:
                     #tb = traceback.format_exc()
-                    mlog_msg = '[RAISE]%s: %s'%(func.__name__,ex)
-                    getLogger(loggername).error(mlog_msg)
+                    qqlog_msg = '[RAISE]%s: %s'%(func.__name__,ex)
+                    getLogger(loggername).error(qqlog_msg)
                 if rethrow:
                     raise ex            
         return func_warp
     return ex_wrap
 
-def trace(level = logging.ERROR,rethrow=False,loggername='mlog'):
+def trace(level = logging.ERROR,rethrow=False,loggername='qqlog'):
     def trace_wrap(func):
         @functools.wraps(func)
         def func_warp(*args, **kwargs):            
@@ -106,15 +106,15 @@ def trace(level = logging.ERROR,rethrow=False,loggername='mlog'):
             except Exception as ex:
                 if level>=__loglevel__:
                     tb = traceback.format_exc()                    
-                    mlog_msg = f'[RAISE]{func.__name__}\n{__line__}TRACE START{__line__}\n{tb}\n{__line__}TRACE END{__line__}\n'
-                    getLogger(loggername).error(mlog_msg)
+                    qqlog_msg = f'[RAISE]{func.__name__}\n{__line__}TRACE START{__line__}\n{tb}\n{__line__}TRACE END{__line__}\n'
+                    getLogger(loggername).error(qqlog_msg)
                 if rethrow:
                     raise ex            
         return func_warp
     return trace_wrap
 
 def setLogger(logger):
-    __mlogger__ = logger
+    __qqlogger__ = logger
 
 def setLogPath(new_path):
     __createLogDir__(new_path)
@@ -131,9 +131,9 @@ def __initHandlers__():
     handlers=['file'] 
     if __consoleOutput__:
         handlers.append('console')
-    __mlogger__.handlers=[]
+    __qqlogger__.handlers=[]
     for name in handlers:
-        __mlogger__.addHandler(__handlers__[name])
+        __qqlogger__.addHandler(__handlers__[name])
     
 
 init()

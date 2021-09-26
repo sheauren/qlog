@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mlog",
+    name="qqlog",
     version="0.0.1",
     author="Sheauren Wang",
     author_email="sheauren@gmail.com",
-    description="method log/exception catching",
+    description="quick method log/exception catching",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/sheauren/mlog",
+    url="https://github.com/sheauren/qqlog",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

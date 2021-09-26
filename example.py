@@ -1,7 +1,7 @@
-from mlog import ex,init,enterleave,trace
+from qqlog import ex,init,enterleave,trace
 #import logging
 init()
-#init(path='./log/mlog.log',level=logging.DEBUG)
+#init(path='./log/qqlog.log',level=logging.DEBUG)
 
 @ex()
 def test1(a,b):
