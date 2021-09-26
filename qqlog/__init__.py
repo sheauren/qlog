@@ -2,6 +2,7 @@ import logging
 import os
 import traceback
 import functools
+from uuid import uuid4
 
 __logFormatter__ = logging.Formatter("%(asctime)-19.19s [%(levelname)s] [%(threadName)s] %(message)s")
 __qqlogger__ = None 
@@ -12,6 +13,7 @@ __consoleOutput__ = True
 __fileHandler__ = None
 __consoleHandler__ = None
 __line__ = '*'*40
+__dirs__=dict()
 def __createFileHandler__():
     global __fileHandler__
     __fileHandler__= logging.FileHandler(__logpath__)
@@ -56,14 +58,67 @@ def getLogger(name):
         return __qqlogger__
     else:
         return logging.getLogger(name)
-    
+
+def dtypeToStr(t,v):
+    global __dirs__
+    if t =='str':
+        return t,"'%s'"%v
+    elif t in ['int','float','complex','dict','set','bool']:
+        return t,str(v)        
+    elif t in ['bytes', 'bytearray', 'memoryview']:
+        return t,str(v)        
+    elif t =='DataFrame':
+        try:            
+            if 'dataframe' not in __dirs__:
+                dataframe_dir = os.path.join(os.path.dirname(__logpath__),'dataframe')
+                __dirs__['dataframe'] = dataframe_dir            
+                if not os.path.isdir(dataframe_dir):
+                    os.makedirs(dataframe_dir)
+            else:
+                dataframe_dir = __dirs__['dataframe']
+            id = uuid4()
+            csv_path = os.path.join(dataframe_dir,f'{id}.csv')            
+            v.to_csv(csv_path,index=False)
+        except Exception as ex:
+            print(ex)            
+        return t,f'[{id}.csv]'
+    elif t =='ndarray': # numpy ndarray
+        try:
+            if 'ndarray' not in __dirs__:
+                ndarray_dir = os.path.join(os.path.dirname(__logpath__),'ndarray')
+                __dirs__['ndarray'] = ndarray_dir            
+                if not os.path.isdir(ndarray_dir):
+                    os.makedirs(ndarray_dir)
+            else:
+                ndarray_dir = __dirs__['ndarray']
+            id = uuid4()
+            ndarray_path = os.path.join(ndarray_dir,f'{id}.txt')            
+            v.tofile(ndarray_path, sep=' ', format='%s')
+        except Exception as ex:
+            print(ex)
+        return t,f'[{id}.ary]'
+
+def formatParams(*args, **kwargs):    
+    # params = ['%d:%s=`%s`'%(i,type(v).__name__,str(v)) for i,v in enumerate(args)]+["%s:%s=`%s`"%(key,type(val).__name__,str(val)) for key,val in kwargs.items()]
+    params = []
+    for i,v in enumerate(args):
+        t = type(v).__name__
+        t,v = dtypeToStr(t,v)
+        params.append(f'{i}:{t}={v}')
+    for k,v in kwargs.items():
+        t = type(v).__name__
+        t,v = dtypeToStr(t,v)
+        params.append(f'{k}:{t}={v}')
+    return params
+
 def enterleave(level = logging.DEBUG,rethrow=True,loggername='qqlog'):
     def enterleave_wrap(func):
         @functools.wraps(func)
         def func_warp(*args, **kwargs):            
             try:
                 if level>=__loglevel__:
-                    qqlog_msg='[ENTER]%s(%s)'%(func.__name__,str(args) + str(kwargs))
+                    params = formatParams(*args,**kwargs)
+                    qqlog_msg='[ENTER]%s(%s)'%(func.__name__,', '.join(params))
                     getLogger(loggername).log(level,qqlog_msg)
                 return_val = func(*args, **kwargs)                
                 if level>=__loglevel__:
@@ -116,19 +171,32 @@ def trace(level = logging.ERROR,rethrow=False,loggername='qqlog'):
 def setLogger(logger):
     __qqlogger__ = logger
 
-def setLogPath(new_path):
-    __createLogDir__(new_path)
-    __logpath__ = new_path     
-    __createFileHandler__()
-    __handlers__['file']=__fileHandler__
+def setLogPath(new_path):    
+    global __logpath__
+    global __dirs__
+    global __handlers__
+    __logpath__ = new_path
+    __dirs__ = []
+    if __logpath__ is not None:
+        __createLogDir__(new_path)
+        __createFileHandler__()
+        __handlers__['file']=__fileHandler__
     __initHandlers__()
 
 def setConsole(output=True):
+    global __consoleOutput__
     __consoleOutput__ = output
     __initHandlers__()
 
-def __initHandlers__():   
-    handlers=['file'] 
+def __initHandlers__():
+    global __logpath__
+    global __consoleOutput__
+    global __qqlogger__
+    global __handlers__
+    if __logpath__ is None:  
+        handlers=[]
+    else:
+        handlers=['file'] 
     if __consoleOutput__:
         handlers.append('console')
     __qqlogger__.handlers=[]

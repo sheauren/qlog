@@ -1,3 +1,4 @@
+
 # qqlog install
 ```python
 pip install qqlog
@@ -46,3 +47,4 @@ ZeroDivisionError: division by zero
 
 ****************************************TRACE END****************************************
 ```
+
