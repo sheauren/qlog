@@ -1,14 +1,14 @@
-# qlog install
+# mlog install
 ```python
-pip install qlog
+pip install mlog
 ```
 
-# qlog example
+# mlog example
 
 ```python
-from qlog import ex,init,enterleave,trace
+from mlog import ex,init,enterleave,trace
 import logging
-# init(path='./log/qlog.log',level=logging.DEBUG)
+# init(path='./log/mlog.log',level=logging.DEBUG)
 init()
 @ex()
 def test1(a,b):
@@ -30,7 +30,7 @@ except Exception as ex:
     print(ex)
 
 ```
-# Console/qlog.log
+# Console/mlog.log
 ```
 2021-09-26 14:00:04 [ERROR] [MainThread] [RAISE]test1: division by zero
 2021-09-26 14:00:04 [DEBUG] [MainThread] [ENTER]test2((1, 1){})
@@ -38,9 +38,9 @@ except Exception as ex:
 2021-09-26 14:00:04 [ERROR] [MainThread] [RAISE]test3
 ****************************************TRACE START****************************************
 Traceback (most recent call last):
-  File "E:\jupyter\projects\whl\qlog\qlog\__init__.py", line 104, in func_warp
+  File "E:\jupyter\projects\whl\mlog\mlog\__init__.py", line 104, in func_warp
     return_val = func(*args, **kwargs)
-  File "E:\jupyter\projects\whl\qlog\example.py", line 16, in test3
+  File "E:\jupyter\projects\whl\mlog\example.py", line 16, in test3
     return a/b
 ZeroDivisionError: division by zero
 
