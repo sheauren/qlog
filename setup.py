@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qqlog",
-    version="0.0.2",
+    version="0.0.3",
     author="Sheauren Wang",
     author_email="sheauren@gmail.com",
     description="quick method log/exception catching",

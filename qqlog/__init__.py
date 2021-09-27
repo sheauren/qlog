@@ -3,6 +3,12 @@ import os
 import traceback
 import functools
 from uuid import uuid4
+import inspect
+
+def _is_method(func):
+    spec = inspect.getargspec(func)
+    return spec.args and spec.args[0] == 'self'
+
 
 __logFormatter__ = logging.Formatter("%(asctime)-19.19s [%(levelname)s] [%(threadName)s] %(message)s")
 __qqlogger__ = None 
@@ -98,13 +104,21 @@ def dtypeToStr(t,v):
             print(ex)
         return t,f'[{id}.ary]'
 
-def formatParams(*args, **kwargs):    
+def formatParams(args, kwargs,isMethod):    
     # params = ['%d:%s=`%s`'%(i,type(v).__name__,str(v)) for i,v in enumerate(args)]+["%s:%s=`%s`"%(key,type(val).__name__,str(val)) for key,val in kwargs.items()]
     params = []
-    for i,v in enumerate(args):
-        t = type(v).__name__
-        t,v = dtypeToStr(t,v)
-        params.append(f'{i}:{t}={v}')
+    if isMethod:
+        for i,v in enumerate(args):
+            if i==0:
+                continue
+            t = type(v).__name__
+            t,v = dtypeToStr(t,v)
+            params.append(f'{i-1}:{t}={v}')
+    else:
+        for i,v in enumerate(args):
+            t = type(v).__name__
+            t,v = dtypeToStr(t,v)
+            params.append(f'{i}:{t}={v}')
     for k,v in kwargs.items():
         t = type(v).__name__
         t,v = dtypeToStr(t,v)
@@ -116,8 +130,8 @@ def enterleave(level = logging.DEBUG,rethrow=True,loggername='qqlog'):
         @functools.wraps(func)
         def func_warp(*args, **kwargs):            
             try:
-                if level>=__loglevel__:
-                    params = formatParams(*args,**kwargs)
+                if level>=__loglevel__:                    
+                    params = formatParams(args,kwargs,_is_method(func))
                     qqlog_msg='[ENTER]%s(%s)'%(func.__name__,', '.join(params))
                     getLogger(loggername).log(level,qqlog_msg)
                 return_val = func(*args, **kwargs)                

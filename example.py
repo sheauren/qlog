@@ -21,6 +21,14 @@ def test4(a,b,prefix='answer is'):
     print('%s %s'%(prefix,str(val)))
     return val
 
+class testclass(object):
+    @enterleave()
+    def __init__(self):
+        print('init')
+    @enterleave()
+    def sum(self,a,b):
+        return a+b
+
 import pandas as pd
 df = pd.DataFrame(data={'1':[1,2,3],'b':['test1','test2','test3']},index=range(3))
 
@@ -44,5 +52,6 @@ try:
     test4(1,2,prefix='result:')
     df_test(1,2,df)
     np_test(1,2,d)
+    testclass().sum(10,20)
 except Exception as ex:
     print(ex)

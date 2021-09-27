@@ -1,0 +1,6 @@
+qqlog.log
+build/*
+qqlog.egg-info/*
+__pycache__
+dataframe/*
+ndarray/*
