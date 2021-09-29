@@ -1,5 +1,4 @@
 from qqlog import ex,init,enterleave,trace
-#import logging
 init()
 #init(path='./log/qqlog.log',level=logging.DEBUG)
 
@@ -45,6 +44,13 @@ def np_test(a,b,d):
     val = a+b+d.sum()    
     return val
 
+import logging
+logging.getLogger('newlogger')
+
+@enterleave(loggername='newlogger',level=logging.ERROR)
+def new_logger_test(a,b):
+    return a+b
+
 try:
     test1(1,0)
     test2(1,1)
@@ -53,5 +59,8 @@ try:
     df_test(1,2,df)
     np_test(1,2,d)
     testclass().sum(10,20)
+    new_logger_test(5,15)
+    
+    
 except Exception as ex:
     print(ex)

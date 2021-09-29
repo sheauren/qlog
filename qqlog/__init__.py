@@ -41,6 +41,7 @@ def init(path='qqlog.log',level=logging.DEBUG):
     global __qqlogger__
     global __loglevel__
     global __handlers__
+    global __logpath__
     
     __qqlogger__ = logging.getLogger('qqlog')
     __qqlogger__.handlers=[]
@@ -138,7 +139,7 @@ def enterleave(level = logging.DEBUG,rethrow=True,loggername='qqlog'):
                 if level>=__loglevel__:
                     qqlog_msg = '[RETURN]%s(%s)'%(func.__name__,return_val)
                     getLogger(loggername).log(level,qqlog_msg)
-                return_val
+                return return_val
             except Exception as ex:
                 #tb = traceback.format_exc()
                 qqlog_msg = '[RAISE]%s: %s'%(func.__name__,ex)
@@ -218,4 +219,4 @@ def __initHandlers__():
         __qqlogger__.addHandler(__handlers__[name])
     
 
-init()
+#init()
