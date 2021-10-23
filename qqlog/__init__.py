@@ -1,9 +1,15 @@
+import time
 import logging
+import logging.handlers
 import os
 import traceback
 import functools
 from uuid import uuid4
 import inspect
+import typing
+import csv
+import codecs
+import io
 
 def _is_method(func):
     spec = inspect.getargspec(func)
@@ -20,6 +26,7 @@ __fileHandler__ = None
 __consoleHandler__ = None
 __line__ = '*'*40
 __dirs__=dict()
+
 def __createFileHandler__():
     global __fileHandler__
     __fileHandler__= logging.FileHandler(__logpath__)
@@ -58,6 +65,7 @@ def init(path='qqlog.log',level=logging.DEBUG):
     __qqlogger__.addHandler(__fileHandler__)
     __createConsoleHandler__()
     __handlers__['console']=__consoleHandler__
+    
     __qqlogger__.addHandler(__consoleHandler__)
     
 def getLogger(name):
@@ -218,5 +226,91 @@ def __initHandlers__():
     for name in handlers:
         __qqlogger__.addHandler(__handlers__[name])
     
+def createConsoleLogger(loggername:str,level:int,formatter:str='%(asctime)-15s %(clientip)s %(user)-8s %(message)s'):
+    logger = logging.getLogger(loggername)
+    logger.setLevel(level)
+    logger.handlers=[]
+    logFormatter = logging.Formatter(formatter)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)    
+
+def createFileLogger(loggername:str,level:int,path:str,formatter:str='%(asctime)-15s %(clientip)s %(user)-8s %(message)s'):
+    logger = logging.getLogger(loggername)
+    logger.setLevel(level)
+    logger.handlers=[]
+    logFormatter = logging.Formatter(formatter)
+    handler = logging.FileHandler(path,encoding='utf-8')    
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)
+
+class CsvFormatter(logging.Formatter):
+    def __init__(self,formatter):
+        super().__init__()
+        
+        self.output = io.StringIO()
+        self.writer = csv.writer(self.output, quoting=csv.QUOTE_ALL)
+        self.formatter=formatter
+        
+
+    def format(self, record):
+        row=[]
+        for name in self.formatter:
+            if hasattr(record,name):
+                row.append(getattr(record,name))    
+            else:
+                if name=='asctime':
+                    asctime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))                    
+                    row.append(asctime)
+                else:
+                    row.append(f'%({name})s')
+        
+        self.writer.writerow(row)
+        data = self.output.getvalue()
+        self.output.truncate(0)
+        self.output.seek(0)
+        return data.strip() 
+
+def createCsvFileLogger(loggername:str,level:int,path:str,headers:list=['asctime','funcName','levelname','msg'],formatters:list=['asctime','funcName','levelname','msg']):
+    if not os.path.isfile(path):
+        with codecs.open(path,'w','utf-8') as f:
+            f.write((','.join(headers))+'\n')
+            
+    logger = logging.getLogger(loggername)
+    logger.setLevel(level)
+    logger.handlers=[]
+    logFormatter = CsvFormatter(formatters)
+    handler = logging.FileHandler(path,encoding='utf-8')
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)
+
+
+def createDailyFileLogger(loggername:str,level:int,path:str,formatter:str='%(asctime)-15s %(clientip)s %(user)-8s %(message)s'):
+    logger = logging.getLogger(loggername)
+    logger.setLevel(level)
+    logger.suffix='%Y-%m-%d'
+    logger.handlers=[]
+    logFormatter = logging.Formatter(formatter)
+    handler = logging.handlers.TimedRotatingFileHandler(path,encoding='utf-8',when='D')
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)
+
+def createConsoleFileLogger(loggername:str,level:int,path:str,formatter:str='%(asctime)-15s %(message)s'):
+    logger = logging.getLogger(loggername)
+    logger.setLevel(level)
+    logger.handlers=[]
+    logFormatter = logging.Formatter(formatter)
+    handler = logging.FileHandler(path,encoding='utf-8')
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)
+    handler = logging.StreamHandler()
+    handler.setFormatter(logFormatter)
+    handler.setLevel(level)    
+    logger.handlers.append(handler)    
 
 #init()

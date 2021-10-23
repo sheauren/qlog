@@ -4,7 +4,7 @@
 pip install qqlog
 ```
 
-# qqlog example
+# qqlog example 1
 
 ```python
 from qqlog import ex,init,enterleave,trace
@@ -106,3 +106,33 @@ init
 [RETURN]new_logger_test(20)                                                                                                       
 ```
 
+# qqlog example 2
+```python
+from qqlog import ex,init,createCsvFileLogger,createConsoleFileLogger
+import logging
+init()
+
+createCsvFileLogger('csv',level=logging.DEBUG,headers=['asctime','funcName','levelname','msg'],formatters=['asctime','funcName','levelname','msg'],path='debug.csv')
+createConsoleFileLogger('consolefile',level=logging.DEBUG,path='./consolefile.log')
+
+@ex(loggername='csv',rethrow=False)
+def test_csv(a,b):
+    return a/b
+
+@ex(loggername='consolefile',rethrow=False)
+def test_consolefile(a,b):
+    return a/b
+
+try:
+    test_csv(1,0)
+    test_consolefile(1,0)
+except Exception as ex:
+    print(ex)
+```
+``` debug.csv
+asctime,funcName,levelname,msg
+"2021-10-23 21:32:26","func_warp","ERROR","[RAISE]test_csv: division by zero"
+```
+``` cnsolefile.log
+2021-10-23 21:32:26,407 [RAISE]test_consolefile: division by zero
+```
